@@ -1,0 +1,22 @@
+{{- if .Values.servicemonitors.enable -}}
+{{- range $i, $sm := .Values.servicemonitors.applications }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ $.Release.Name }}-servicemonitor
+  namespace: {{ $sm.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $sm.name }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "-" }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app.kubernetes.io/instance: {{ $sm.argocdInstanceLabelValue }}-{{ $sm.name }} # this makes the sm part of argocd app
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $sm.argocdInstanceLabelValue }}
+  endpoints:
+  - port: {{ $sm.port }}        # works for different port numbers as long as the name matches
+    interval: {{ $sm.scrapeInterval }}        # scrape the endpoint every 10 seconds
+    path: {{ $sm.path }}
+{{ end -}}
+{{ end -}}

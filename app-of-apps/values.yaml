@@ -1,0 +1,48 @@
+namespaces:
+  enable: false
+  list:
+    operations:
+      name: operations
+    monitoring:
+      name: monitoring
+
+argocd:
+  enable: false
+  app:
+    name: argocd
+    version: HEAD
+    repoURL: https://bitbucket.org/appcurator/argocd
+    path: app_manifests/operational/argocd
+  namespace: argocd
+
+destination:
+  cluster:
+    name: chris-server
+    server: https://kubernetes.default.svc
+
+argocd_app:
+  enabled: true
+  # annotations:
+  #   notifications.argoproj.io/subscribe.on-sync-failed.teams: argocd-notifications
+  #   notifications.argoproj.io/subscribe.on-health-degraded.teams: argocd-notifications
+  #   notifications.argoproj.io/subscribe.on-deleted.teams: argocd-notifications
+  #   notifications.argoproj.io/subscribe.on-sync-status-unknown.teams: argocd-notifications
+  # Enables autosync
+  # Autosync has 3 more options to enable
+  autosync:
+    enabled: false
+    # Removes resources during autosync
+    prune: false
+    # reverts any manual changes on a cluster to ArgoCD state
+    selfHeal: false
+  # Be careful when enabling finalizers!
+  # deletes resources when app is deleted (cascade)
+  finalizer:
+    enabled: false
+  # enables the ArgoCD project for the application
+  project:
+    enabled: false
+  applications: {}
+
+servicemonitors:
+  enable: false

@@ -1,0 +1,11 @@
+{{- if $.Values.namespaces.enable -}}
+{{- range $i, $ns := .Values.namespaces.list }}
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: {{ $ns.name }}
+  labels:
+    name: {{ $ns.name }}
+{{end -}}
+{{end -}}

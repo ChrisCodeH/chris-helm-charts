@@ -1,0 +1,5 @@
+apiVersion: v2
+dependencies: null
+description: A Generic chart that encompasses ArgoCD's app-of-apps concept
+name: app-of-apps
+version: 0.1.0

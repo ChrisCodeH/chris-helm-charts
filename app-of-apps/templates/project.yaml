@@ -1,0 +1,21 @@
+{{- if $.Values.argocd_app.project.enabled -}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ $.Values.destination.cluster.name }}
+  namespace: argocd
+spec:
+  description: Deploy to cluster {{ $.Values.destination.cluster.name }}
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: '*'
+    server: {{ $.Values.destination.cluster.server }}
+  namespaceResourceBlacklist:
+  - group: ''
+    kind: ''
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+{{end -}}

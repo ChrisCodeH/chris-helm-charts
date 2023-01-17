@@ -1,0 +1,90 @@
+{{- if .Values.argocd_app.enabled -}}
+{{- range $i, $app := .Values.argocd_app.applications }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $.Values.destination.cluster.name }}-{{ include "services.fullname" $app }}
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: {{ include "services.fullname" $app }}
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "-" }}
+    app.kubernetes.io/managed-by: {{ $.Release.Service }}
+{{- if $.Values.argocd_app.finalizer.enabled }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+{{- else }}
+{{- end }}
+{{- if $.Values.argocd_app.annotations }}
+  annotations:
+{{ toYaml $.Values.argocd_app.annotations | indent 4 }}
+{{- end }}
+spec:
+  project: {{ $.Values.destination.cluster.name }}
+  source:
+    repoURL: {{ $app.repoURL }}
+    targetRevision: {{ default $app.version $.Values.revision | quote }}
+{{- if index $app "directory" }}
+    directory:
+      {{- $app.directory | toYaml | nindent 6 }}
+{{- end }}
+{{- if index $app "path" }}
+    path: {{ $app.path }}
+{{- else }}
+    chart: {{ $app.name }}
+{{- end }}
+{{- if index $app "chart" }}
+    helm:
+      releaseName: {{ include "services.fullname" $app }}
+      skipCrds: {{ $app.chart.skipCrds | default false }}
+{{- if index $app.chart "values" }}
+      values: {{ $app.chart.values | toYaml | indent 6 }}
+{{- end }}
+{{- if index $app.chart "valueFiles" }}
+      valueFiles:
+{{ $app.chart.valueFiles | toYaml | indent 8 }}
+{{- end }}
+{{- end }}
+{{- if index $app "plugin" }}
+    plugin:
+      name: {{ $app.plugin.name }}
+{{- if index $app.plugin "env" }}
+      env:
+        - name: NAMESPACE
+          value: {{ $app.namespace }}
+        - name: VALUES_FILES
+          value: "{{ range $app.plugin.env }} -f {{ . }} {{- end }}"
+{{- end }}
+{{- end }}
+  destination:
+    server: {{ $.Values.destination.cluster.server }}
+    namespace: {{ $app.namespace }}
+{{- if and $.Values.argocd_app.autosync.enabled $.Values.argocd_app.autosync.prune $.Values.argocd_app.autosync.selfHeal }}
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+{{- if index $app "syncPolicy" }}
+    {{- $app.syncPolicy | toYaml | nindent 4 }}
+{{- end }}
+{{- else if and ($.Values.argocd_app.autosync.enabled) (eq $.Values.argocd_app.autosync.prune false) (eq $.Values.argocd_app.autosync.selfHeal false) }}
+  syncPolicy:
+    automated: {}
+{{- if index $app "syncPolicy" }}
+    {{- $app.syncPolicy | toYaml | nindent 4 }}
+{{- end }}
+{{- else if and $.Values.argocd_app.autosync.enabled  $.Values.argocd_app.autosync.prune}}
+  syncPolicy:
+    automated:
+      prune: true
+{{- else if and $.Values.argocd_app.autosync.enabled  $.Values.argocd_app.autosync.selfHeal }}
+  syncPolicy:
+    automated:
+      selfHeal: true
+{{- if index $app "syncPolicy" }}
+    {{- $app.syncPolicy | toYaml | nindent 4 }}
+{{- end }}
+{{- else }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
