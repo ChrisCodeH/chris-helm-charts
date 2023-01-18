@@ -7,6 +7,6 @@ entries:
     digest: a80f52697a9f6f2e19a6442d79b21fe957f3d639b59b7b71116824ae1b831e00
     name: app-of-apps
     urls:
-    - https://github.com/ChrisCodeH/chris-helm-charts/blob/main/app-of-apps-0.1.0.tgz
+    - https://chriscodeh.github.io/chris-helm-charts/app-of-apps-0.1.0.tgz
     version: 0.1.0
 generated: "2023-01-17T11:29:03.7084771Z"
